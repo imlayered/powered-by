@@ -14,3 +14,5 @@ Easily and quickly check what a website is using
 | [XenForo](https://xenforo.com/) | Planned | n/a | Software | 
 | [NamelessMC](https://namelessmc.com/) | Planned | n/a | Software |
 | [WHMCS](https://www.whmcs.com/) | Planned | n/a | Software |
+| [Pterodactyl (Standalone)](https://pterodactyl.io/) | Planned | n/a | Software |
+| [Pterodactyl (w/ Blueprint)](https://blueprint.zip/) | Planned | n/a | Software |

@@ -1,0 +1,111 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Roboto, Arial, sans-serif;
+    background: #181a1b;
+    color: #f5f6fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1 0 auto;
+    min-height: 0;
+    width: 100vw;
+}
+
+.title {
+    font-size: 2.2rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    color: #f5f6fa;
+    letter-spacing: -1px;
+    text-align: center;
+}
+
+.typewriter-line {
+    font-size: 2.2rem;
+    font-weight: 400;
+    margin-bottom: 2rem;
+    color: #f5f6fa;
+    letter-spacing: -1px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.typewriter {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    min-width: 10ch;
+    width: 13ch;
+    letter-spacing: -1px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    margin: 0 auto 1.2rem auto;
+}
+
+.search-form {
+    display: flex;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 2rem;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    border: 1px solid #333;
+    border-radius: 24px 0 0 24px;
+    outline: none;
+    background: #23272a;
+    color: #f5f6fa;
+    transition: border 0.2s;
+}
+
+.search-input:focus {
+    border-color: #5e9cff;
+}
+
+.detect-btn {
+    padding: 0 1.5rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 0 24px 24px 0;
+    background: #5e9cff;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.detect-btn:hover {
+    background: #4285f4;
+}
+
+.results {
+    width: 100%;
+    max-width: 400px;
+    min-height: 2rem;
+    color: #bfc9d1;
+    font-size: 1rem;
+    text-align: center;
+}
