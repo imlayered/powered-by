@@ -10,6 +10,7 @@ Easily and quickly check what a website is using
 | DNS/IP | Done 🟢 | Provider |
 | Cloudflare status | Done 🟢 | Provider |  
 | IP Address | Done 🟢 | Information |
+| Domain Info | Done 🟢 | Information |
 | [WordPress](https://wordpress.org/) | Planned 🟡 | Software | 
 | [Ghost](https://ghost.org/) | Planned 🟡 | Software | 
 | [XenForo](https://xenforo.com/) | Planned 🟡 | Software | 

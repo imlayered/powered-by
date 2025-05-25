@@ -40,7 +40,7 @@ function isIPInCloudflare(ip) {
 }
 
 // api for whois check
-app.post('/api/whois', async (req, res) => {
+app.post('/api/check', async (req, res) => {
     const { url } = req.body;
     if (!url) {
         return res.status(400).json({ error: 'Missing url' });

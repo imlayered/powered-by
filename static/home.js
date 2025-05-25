@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ]);
         };
         try {
-            const response = await fetchWithTimeout('/api/whois', {
+            const response = await fetchWithTimeout('/api/check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url }),
@@ -104,15 +104,36 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 const whois = data.data;
                 const registrar = whois.registrar || whois['Registrar'] || whois['registrarName'] || 'Unknown';
-                let cfText = '';
-                if (typeof data.isCloudflare === 'boolean') {
-                    cfText = `<div><strong>Behind Cloudflare:</strong> ${data.isCloudflare ? 'Yes' : 'No'}</div>`;
+                let createdDate = whois.creationDate || whois['Creation Date'] || whois['createdDate'] || whois['created'] || '';
+                let domainSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Domain</strong><br><strong>Registrar:</strong> ${registrar}`;
+                if (createdDate) {
+                    let created = new Date(createdDate);
+                    if (!isNaN(created)) {
+                        let now = new Date();
+                        let years = now.getFullYear() - created.getFullYear();
+                        let months = now.getMonth() - created.getMonth();
+                        if (months < 0) {
+                            years--;
+                            months += 12;
+                        }
+                        domainSection += `<br><strong>Domain Age:</strong> ${years} year${years !== 1 ? 's' : ''}${months > 0 ? `, ${months} month${months !== 1 ? 's' : ''}` : ''}`;
+                        if (years < 1) {
+                            domainSection += ` <span style='color:#c00;cursor:help;' title='This domain is younger than 1 year old which is an indicator for potential spam/scam.'>(New domain)</span>`;
+                        } else if (years >= 10) {
+                            domainSection += ` <span style='color:#090;cursor:help;' title='This domain has been around for more than 10 years, it may be more trustworthy than a new domain.'>(Old domain)</span>`;
+                        }
+                    }
                 }
-                let ipText = '';
+                domainSection += '</div>';
+                let ipSection = '';
                 if (!data.isCloudflare && data.ip) {
-                    ipText = `<div><strong>IP Address:</strong> ${data.ip}</div>`;
+                    ipSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>IP</strong><br><strong>IP Address:</strong> ${data.ip}</div>`;
                 }
-                results.innerHTML = `<div style=\"margin-bottom:0.5em\"><strong>Registrar:</strong> ${registrar}</div>${cfText}${ipText}`;
+                let cfSection = '';
+                if (typeof data.isCloudflare === 'boolean') {
+                    cfSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Cloudflare</strong><br><strong>Behind Cloudflare:</strong> ${data.isCloudflare ? 'Yes' : 'No'}</div>`;
+                }
+                results.innerHTML = domainSection + cfSection + ipSection;
             } else {
                 results.textContent = 'Error: ' + (data.error || 'Unknown error');
             }
