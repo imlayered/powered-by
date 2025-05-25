@@ -70,4 +70,50 @@ function syncedTypeWriter() {
 
 document.addEventListener('DOMContentLoaded', () => {
     syncedTypeWriter();
+
+    const form = document.querySelector('.search-form');
+    const input = document.querySelector('.search-input');
+    const results = document.getElementById('results');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        results.textContent = 'Checking...';
+        let url = input.value.trim();
+        if (!url) {
+            results.textContent = 'Please enter a URL.';
+            return;
+        }
+        url = url.replace(/^(https?:\/\/)/, '').replace(/\/$/, '');
+        const fetchWithTimeout = (resource, options = {}) => {
+            const { timeout = 10000 } = options;
+            return Promise.race([
+                fetch(resource, options),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('timeout')), timeout)
+                )
+            ]);
+        };
+        try {
+            const response = await fetchWithTimeout('/api/whois', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url }),
+                timeout: 10000
+            });
+            const data = await response.json();
+            if (data.success) {
+                const whois = data.data;
+                const registrar = whois.registrar || whois['Registrar'] || whois['registrarName'] || 'Unknown';
+                results.innerHTML = `<div style=\"margin-bottom:0.5em\"><strong>Registrar:</strong> ${registrar}</div>`;
+            } else {
+                results.textContent = 'Error: ' + (data.error || 'Unknown error');
+            }
+        } catch (err) {
+            if (err.message === 'timeout') {
+                results.textContent = 'No response';
+            } else {
+                results.textContent = 'Request failed: ' + err.message;
+            }
+        }
+    });
 });
