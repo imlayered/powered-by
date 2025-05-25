@@ -132,6 +132,22 @@ async function detectCMS(url) {
         ) {
             return { cms: { name: 'Substack', url: 'https://substack.com' } };
         }
+        // Google Sites
+        if (
+            html.includes('https://sites.google.com/new/?usp') ||
+            html.includes('content="Google Sites"') ||
+            html.includes('sites.google.com')
+        ) {
+            return { cms: { name: 'Google Sites', url: 'https://sites.google.com/' } };
+        }
+        // Wix
+        if (
+            html.includes('<!-- sentryOnLoad Setup Script -->') ||
+            html.includes('<script defer="" src="https://static.parastorage.com/'),
+            html.includes('wixui-')
+        ) {
+            return { cms: { name: 'Wix', url: 'https://wix.com' } };
+        }
         // more
         
         return { cms: null };

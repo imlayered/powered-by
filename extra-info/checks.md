@@ -14,7 +14,8 @@
 | [Blesta](https://www.blesta.com/) | Done 🟢 | Software/Billing |
 | [Pterodactyl](https://pterodactyl.io/) | Done 🟢 | Software |
 | [Substack](https://substack.com) | Done 🟢 | Builder/CMS |
-| [Google Sites](https://sites.google.com) | Planned 🟡 | Builder |
+| [Google Sites](https://sites.google.com) | Done 🟢 | Builder |
 | [Wix](https://wix.com) | Planned 🟡 | Builder/CMS |
+| [Shopify](https://shopify.com) | Planned 🟡 | Builder/CMS |
 | [Squarespace](https://squarespace.com) | Planned 🟡 | Builder/CMS |
 | [Odoo](https://www.odoo.com) | Planned 🟡 | Builder/CMS |

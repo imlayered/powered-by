@@ -12,6 +12,8 @@
 | [Blesta](https://www.blesta.com/) | Billing/Software |
 | [Pterodactyl](https://pterodactyl.io/) | Software |
 | [Substack](https://substack.com) | CMS/Builder |
+| [Google Sites](https://sites.google.com/) | CMS/Builder |
+| [Wix](https://www.wix.com/) | Billing/Builder |
 
 ## Want a software added?
 Open an issue on the [GitHub repository](https://github.com/imlayered/powered-by) with the software name, type, and any identifiers you can find.
