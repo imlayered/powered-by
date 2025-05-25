@@ -19,6 +19,5 @@ Easily and quickly check what a website is using
 | [WHMCS](https://www.whmcs.com/) | Done 🟢 | Software/Billing |
 | [Paymenter](https://paymenter.org/) | Planned 🟡 | Software/Billing |
 | [Blesta](https://www.blesta.com/) | Planned 🟡 | Software/Billing |
-| [Blesta](https://www.blesta.com/) | Planned 🟡 | Software/Billing |
 | [Pterodactyl (Standalone)](https://pterodactyl.io/) | Planned 🟡 | Software |
 | [Pterodactyl (w/ Blueprint)](https://blueprint.zip/) | Planned 🟡 | Software |
