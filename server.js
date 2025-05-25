@@ -73,12 +73,37 @@ async function detectCMS(url) {
         if (html.includes('whmcsBaseUrl = ""')) {
             return { cms: { name: 'WHMCS', url: 'https://www.whmcs.com/' } };
         }
+        // Paymenter
+        if (
+            html.includes('<p class="text-sm">Powered by Paymenter</p>') ||
+            html.includes('data-update-uri="/paymenter/update"')
+        ) {
+            return { cms: { name: 'Paymenter', url: 'https://paymenter.org/' } };
+        }
+        // Blesta
+        if (
+            html.includes('class="blesta"') ||
+            html.includes('<p class="text-center m-3">Powered by <a href="http://www.blesta.com/">Blesta</a>, &copy; Phillips Data, Inc.</p>')
+        ) {
+            return { cms: { name: 'Blesta', url: 'https://www.blesta.com/' } };
+        }
         // XenForo
         if (
-            html.includes('data-xf-') ||
+            html.includes('data-xf-'),
             html.includes('/styles/default/xenforo/')
         ) {
             return { cms: { name: 'XenForo', url: 'https://xenforo.com' } };
+        }
+        // Invision Community
+        if (
+            html.includes('<a rel="nofollow" title="Invision Community" href="https://www.invisioncommunity.com/">Powered by <span translate="no">Invision Community</span></a>') ||
+            html.includes('ipsOffCanvas') ||
+            html.includes('data-ips-hidden-group') ||
+            html.includes('ipsOffCanvas--search') ||
+            html.includes('ipsDataItem_stats_number') ||
+            html.includes('ipsDataItem_stats_type')
+        ) {
+            return { cms: { name: 'Invision Community', url: 'https://www.invisioncommunity.com/' } };
         }
         // NamelessMC
         const namelessChecks = [
@@ -88,8 +113,15 @@ async function detectCMS(url) {
             html.includes('window.cookieconsent.initialise({')
         ];
         const namelessCount = namelessChecks.filter(Boolean).length;
-        if (namelessCount >= 2) {
+        if (namelessCount >= 2) { // only is included bc nameless has weird html and only 1 is unique enough
             return { cms: { name: 'NamelessMC', url: 'https://namelessmc.com' } };
+        }
+        // Pterodactyl
+        if (
+            html.includes('<p class="PteroFooter">') ||
+            html.match(/© 2015 - 20.*Pterodactyl Software/)
+        ) {
+            return { cms: { name: 'Pterodactyl', url: 'https://pterodactyl.io' } };
         }
         // more
         

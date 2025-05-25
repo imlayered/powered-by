@@ -15,9 +15,8 @@ Easily and quickly check what a website is using
 | [Ghost](https://ghost.org/) | Done 🟢 | Software/CMS | 
 | [XenForo](https://xenforo.com/) | Done 🟢 | Software/Forum | 
 | [NamelessMC](https://namelessmc.com/) | Done 🟢 | Software/Forum |
-| [Invision](https://invisioncommunity.com/) | Planned 🟡 | Software/Forum |
+| [Invision](https://invisioncommunity.com/) | Done 🟢 | Software/Forum |
 | [WHMCS](https://www.whmcs.com/) | Done 🟢 | Software/Billing |
-| [Paymenter](https://paymenter.org/) | Planned 🟡 | Software/Billing |
-| [Blesta](https://www.blesta.com/) | Planned 🟡 | Software/Billing |
-| [Pterodactyl (Standalone)](https://pterodactyl.io/) | Planned 🟡 | Software |
-| [Pterodactyl (w/ Blueprint)](https://blueprint.zip/) | Planned 🟡 | Software |
+| [Paymenter](https://paymenter.org/) | Done 🟢 | Software/Billing |
+| [Blesta](https://www.blesta.com/) | Done 🟢 | Software/Billing |
+| [Pterodactyl](https://pterodactyl.io/) | Done 🟢 | Software |
