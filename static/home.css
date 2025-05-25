@@ -109,3 +109,25 @@ body {
     font-size: 1rem;
     text-align: center;
 }
+
+.copyright {
+    width: 100vw;
+    text-align: center;
+    color: #bfc9d1;
+    font-size: 0.95rem;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.01em;
+    background: none;
+    font-family: inherit;
+}
+
+.copyright a {
+    color: #5e9cff;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.copyright a:hover {
+    color: #4285f4;
+}
