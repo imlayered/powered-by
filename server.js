@@ -123,12 +123,36 @@ async function detectCMS(url) {
         ) {
             return { cms: { name: 'Pterodactyl', url: 'https://pterodactyl.io' } };
         }
+        // Substack
+        if (
+            html.includes('<link rel="preconnect" href="https://substackcdn.com"') ||
+            html.includes("service: 'substack-web'") ||
+            /allowedTracingUrls:\s*\[.*substack(cdn)?\.com.*\]/.test(html) ||
+            /https?:\/\/(.+\/)?substack(cdn)?\.com/.test(html)
+        ) {
+            return { cms: { name: 'Substack', url: 'https://substack.com' } };
+        }
         // more
         
         return { cms: null };
     } catch (error) {
         console.error(`Error fetching ${url}:`, error.message);
         return { cms: null, error: error.message };
+    }
+}
+
+function getBaseDomain(url) {
+    try {
+        let domain = url.replace(/^https?:\/\//, '');
+        domain = domain.split('/')[0];
+        domain = domain.split(':')[0];
+        const parts = domain.split('.');
+        if (parts.length > 2) {
+            return parts.slice(-2).join('.');
+        }
+        return domain;
+    } catch {
+        return url;
     }
 }
 
@@ -139,10 +163,11 @@ app.post('/api/check', async (req, res) => {
         return res.status(400).json({ error: 'Missing url' });
     }
     try {
-        const data = await whois(url);
+        const baseDomain = getBaseDomain(url);
+        const data = await whois(baseDomain);
         let ip;
         try {
-            const addresses = await dns.lookup(url.replace(/^https?:\/\//, ''), { all: true });
+            const addresses = await dns.lookup(baseDomain, { all: true });
             ip = addresses[0]?.address;
         } catch (e) {
             ip = null;
@@ -151,9 +176,7 @@ app.post('/api/check', async (req, res) => {
         if (ip) {
             isCloudflare = isIPInCloudflare(ip);
         }
-        
         const cmsData = await detectCMS(url);
-        
         if (isCloudflare) {
             res.json({ success: true, data, isCloudflare, cmsData });
         } else {

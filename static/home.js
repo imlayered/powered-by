@@ -77,6 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const data = await response.json();
             
+            let warning = '';
+            if (data.cmsData && data.cmsData.error) {
+                warning = `<div style="background:#ffefc0;color:#a67c00;padding:0.7em 1em;margin-bottom:1em;border-radius:6px;font-size:1.02em;font-weight:500;">Some details may be unavailable as <strong>${displayUrl}</strong> blocked the request.</div>`;
+            }
+            
             if (data.success) {
                 const whois = data.data;
                 const registrar = whois.registrar || whois['Registrar'] || whois['registrarName'] || 'Unknown';
@@ -138,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cmsSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Software</strong><br><strong>CMS:</strong> ${cmsDisplay}</div>`;
                 }
                 
-                results.innerHTML = domainSection + cmsSection + cfSection + ipSection;
+                results.innerHTML = warning + domainSection + cmsSection + cfSection + ipSection;
             } else {
                 results.textContent = 'Error: ' + (data.error || 'Unknown error');
             }
