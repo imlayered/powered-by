@@ -104,7 +104,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 const whois = data.data;
                 const registrar = whois.registrar || whois['Registrar'] || whois['registrarName'] || 'Unknown';
-                results.innerHTML = `<div style=\"margin-bottom:0.5em\"><strong>Registrar:</strong> ${registrar}</div>`;
+                let cfText = '';
+                if (typeof data.isCloudflare === 'boolean') {
+                    cfText = `<div><strong>Behind Cloudflare:</strong> ${data.isCloudflare ? 'Yes' : 'No'}</div>`;
+                }
+                let ipText = '';
+                if (!data.isCloudflare && data.ip) {
+                    ipText = `<div><strong>IP Address:</strong> ${data.ip}</div>`;
+                }
+                results.innerHTML = `<div style=\"margin-bottom:0.5em\"><strong>Registrar:</strong> ${registrar}</div>${cfText}${ipText}`;
             } else {
                 results.textContent = 'Error: ' + (data.error || 'Unknown error');
             }
