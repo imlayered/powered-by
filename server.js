@@ -59,9 +59,38 @@ async function detectCMS(url) {
             html.includes('wp-includes') ||
             html.includes('wp-json')
         ) {
-            return { cms: 'WordPress' };
+            return { cms: { name: 'WordPress', url: 'https://wordpress.org' } };
         }
         
+        // Ghost
+        if (
+            html.match(/data-ghost-[a-zA-Z0-9_-]+/i) ||
+            html.match(/--ghost-[a-zA-Z0-9_-]+/i)
+        ) {
+            return { cms: { name: 'Ghost', url: 'https://ghost.org' } };
+        }
+        // WHMCS
+        if (html.includes('whmcsBaseUrl = ""')) {
+            return { cms: { name: 'WHMCS', url: 'https://www.whmcs.com/' } };
+        }
+        // XenForo
+        if (
+            html.includes('data-xf-') ||
+            html.includes('/styles/default/xenforo/')
+        ) {
+            return { cms: { name: 'XenForo', url: 'https://xenforo.com' } };
+        }
+        // NamelessMC
+        const namelessChecks = [
+            html.includes('<span class="item">Powered By <a href="https://namelessmc.com">NamelessMC</a></span>'),
+            html.includes('<a class="ui small default button"'),
+            html.includes("console.warn('Failed to initialise cookie consent, it may be blocked by your browser or a browser extension');") ||
+            html.includes('window.cookieconsent.initialise({')
+        ];
+        const namelessCount = namelessChecks.filter(Boolean).length;
+        if (namelessCount >= 2) {
+            return { cms: { name: 'NamelessMC', url: 'https://namelessmc.com' } };
+        }
         // more
         
         return { cms: null };

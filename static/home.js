@@ -87,7 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 typewriterElem.style.display = 'none';
                 
                 if (cmsData.cms) {
-                    titleElement.innerHTML = `<strong>${displayUrl}</strong> is powered by <strong>${cmsData.cms}</strong>`;
+                    let cmsDisplay = cmsData.cms;
+                    if (typeof cmsData.cms === 'object' && cmsData.cms.name && cmsData.cms.url) {
+                        cmsDisplay = `<a href="${cmsData.cms.url}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;" data-cms-link>${cmsData.cms.name}</a>`;
+                    }
+                    titleElement.innerHTML = `<strong>${displayUrl}</strong> is powered by <strong>${cmsDisplay}</strong>`;
                 } else {
                     titleElement.innerHTML = `We can't determine what software/CMS <strong>${displayUrl}</strong> is using  <span class="help-icon" title="Click for more information">(?)</span>`;
                     
@@ -127,7 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 let cmsSection = '';
                 if (cmsData.cms) {
-                    cmsSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Software</strong><br><strong>CMS:</strong> ${cmsData.cms}</div>`;
+                    let cmsDisplay = cmsData.cms;
+                    if (typeof cmsData.cms === 'object' && cmsData.cms.name && cmsData.cms.url) {
+                        cmsDisplay = `<a href="${cmsData.cms.url}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;" data-cms-link>${cmsData.cms.name}</a>`;
+                    }
+                    cmsSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Software</strong><br><strong>CMS:</strong> ${cmsDisplay}</div>`;
                 }
                 
                 results.innerHTML = domainSection + cmsSection + cfSection + ipSection;

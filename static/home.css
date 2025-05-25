@@ -156,3 +156,12 @@ body {
 .copyright a:hover {
     color: #4285f4;
 }
+
+a[href^="https://"][data-cms-link] {
+    color: inherit;
+    text-decoration: underline;
+    transition: filter 0.15s;
+}
+a[href^="https://"][data-cms-link]:hover {
+    filter: brightness(0.7);
+}
