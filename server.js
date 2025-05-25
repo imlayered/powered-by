@@ -39,7 +39,39 @@ function isIPInCloudflare(ip) {
     });
 }
 
-// api for whois check
+// cms detection
+async function detectCMS(url) {
+    try {
+        const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+        const response = await axios.get(fullUrl, {
+            timeout: 10000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+        });
+        
+        const html = response.data;
+        
+        // WordPress
+        if (
+            html.includes('/wp-content/') || 
+            html.includes('wp-block-') || 
+            html.includes('wp-includes') ||
+            html.includes('wp-json')
+        ) {
+            return { cms: 'WordPress' };
+        }
+        
+        // more
+        
+        return { cms: null };
+    } catch (error) {
+        console.error(`Error fetching ${url}:`, error.message);
+        return { cms: null, error: error.message };
+    }
+}
+
+// api
 app.post('/api/check', async (req, res) => {
     const { url } = req.body;
     if (!url) {
@@ -58,10 +90,13 @@ app.post('/api/check', async (req, res) => {
         if (ip) {
             isCloudflare = isIPInCloudflare(ip);
         }
+        
+        const cmsData = await detectCMS(url);
+        
         if (isCloudflare) {
-            res.json({ success: true, data, isCloudflare });
+            res.json({ success: true, data, isCloudflare, cmsData });
         } else {
-            res.json({ success: true, data, isCloudflare, ip });
+            res.json({ success: true, data, isCloudflare, ip, cmsData });
         }
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

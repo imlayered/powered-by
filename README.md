@@ -11,10 +11,10 @@ Easily and quickly check what a website is using
 | Cloudflare status | Done 🟢 | Provider |  
 | IP Address | Done 🟢 | Information |
 | Domain Info | Done 🟢 | Information |
-| [WordPress](https://wordpress.org/) | Planned 🟡 | Software | 
-| [Ghost](https://ghost.org/) | Planned 🟡 | Software | 
-| [XenForo](https://xenforo.com/) | Planned 🟡 | Software | 
-| [NamelessMC](https://namelessmc.com/) | Planned 🟡 | Software |
-| [WHMCS](https://www.whmcs.com/) | Planned 🟡 | Software |
+| [WordPress](https://wordpress.org/) | Done 🟢 | Software/CMS | 
+| [Ghost](https://ghost.org/) | Planned 🟡 | Software/CMS | 
+| [XenForo](https://xenforo.com/) | Planned 🟡 | Software/Forum | 
+| [NamelessMC](https://namelessmc.com/) | Planned 🟡 | Software/Forum |
+| [WHMCS](https://www.whmcs.com/) | Planned 🟡 | Software/CMS |
 | [Pterodactyl (Standalone)](https://pterodactyl.io/) | Planned 🟡 | Software |
 | [Pterodactyl (w/ Blueprint)](https://blueprint.zip/) | Planned 🟡 | Software |
