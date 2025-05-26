@@ -313,10 +313,28 @@ app.post('/api/check', async (req, res) => {
             isCloudflare = isIPInCloudflare(ip);
         }
         const cmsData = await detectCMS(url);
+        // dino
+        let isOldAsRocks = false;
+        let createdDate = data.creationDate || data['Creation Date'] || data['createdDate'] || data['created'] || null;
+        if (createdDate) {
+            let created = new Date(createdDate);
+            if (!isNaN(created)) {
+                let now = new Date();
+                let years = now.getFullYear() - created.getFullYear();
+                let months = now.getMonth() - created.getMonth();
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+                if (years >= 20) {
+                    isOldAsRocks = true;
+                }
+            }
+        }
         if (isCloudflare) {
-            res.json({ success: true, data, isCloudflare, cmsData });
+            res.json({ success: true, data, isCloudflare, cmsData, isOldAsRocks });
         } else {
-            res.json({ success: true, data, isCloudflare, ip, cmsData });
+            res.json({ success: true, data, isCloudflare, ip, cmsData, isOldAsRocks });
         }
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

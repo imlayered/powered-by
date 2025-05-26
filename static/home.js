@@ -86,11 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const whois = data.data;
                 const registrar = whois.registrar || whois['Registrar'] || whois['registrarName'] || 'Unknown';
                 let createdDate = whois.creationDate || whois['Creation Date'] || whois['createdDate'] || whois['created'] || '';
-                
                 const cmsData = data.cmsData || { cms: null };
-                
                 typewriterElem.style.display = 'none';
-                
                 if (cmsData.cms) {
                     let cmsDisplay = cmsData.cms;
                     if (typeof cmsData.cms === 'object' && cmsData.cms.name && cmsData.cms.url) {
@@ -99,10 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     titleElement.innerHTML = `<strong>${displayUrl}</strong> is powered by <strong>${cmsDisplay}</strong>`;
                 } else {
                     titleElement.innerHTML = `We can't determine what software/CMS <strong>${displayUrl}</strong> is using  <span class="help-icon" title="Click for more information">(?)</span>`;
-                    
                     setTimeout(addHelpIconClickEvent, 100);
                 }
-                
                 let domainSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Domain</strong><br><strong>Registrar:</strong> ${registrar}`;
                 if (createdDate) {
                     let created = new Date(createdDate);
@@ -123,17 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 domainSection += '</div>';
-                
                 let ipSection = '';
                 if (!data.isCloudflare && data.ip) {
                     ipSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>IP</strong><br><strong>IP Address:</strong> ${data.ip}</div>`;
                 }
-                
                 let cfSection = '';
                 if (typeof data.isCloudflare === 'boolean') {
                     cfSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Cloudflare</strong><br><strong>Behind Cloudflare:</strong> ${data.isCloudflare ? 'Yes' : 'No'}</div>`;
                 }
-                
                 let cmsSection = '';
                 if (cmsData.cms) {
                     let cmsDisplay = cmsData.cms;
@@ -142,8 +134,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     cmsSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Software</strong><br><strong>CMS:</strong> ${cmsDisplay}</div>`;
                 }
-                
                 results.innerHTML = warning + domainSection + cmsSection + cfSection + ipSection;
+                const dinoImgId = 'dino-img-footer';
+                let dino = document.getElementById(dinoImgId);
+                if (dino) dino.remove();
+                if (data.isOldAsRocks) {
+                    dino = document.createElement('img');
+                    dino.src = '/static/images/dino.png';
+                    dino.alt = 'Dino';
+                    dino.id = dinoImgId;
+                    dino.style.display = 'block';
+                    dino.style.margin = '2em auto 0 auto';
+                    dino.style.maxWidth = '120px';
+                    dino.style.opacity = '0.85';
+                    dino.title = 'This domain is over 20 years old!';
+                    results.appendChild(dino);
+                }
             } else {
                 results.textContent = 'Error: ' + (data.error || 'Unknown error');
             }
