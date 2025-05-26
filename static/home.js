@@ -120,7 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 domainSection += '</div>';
                 let ipSection = '';
                 if (!data.isCloudflare && data.ip) {
-                    ipSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>IP</strong><br><strong>IP Address:</strong> ${data.ip}</div>`;
+                    let ipLines = '';
+                    if (data.ip.ipv4) ipLines += `<strong>IPv4:</strong> ${data.ip.ipv4}<br>`;
+                    if (data.ip.ipv6) ipLines += `<strong>IPv6:</strong> ${data.ip.ipv6}<br>`;
+                    if (ipLines) {
+                        ipSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>IP</strong><br>${ipLines.replace(/<br>$/, '')}</div>`;
+                    }
                 }
                 let cfSection = '';
                 if (typeof data.isCloudflare === 'boolean') {

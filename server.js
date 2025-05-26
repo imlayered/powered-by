@@ -64,17 +64,20 @@ app.post('/api/check', async (req, res) => {
     try {
         const baseDomain = getBaseDomain(url);
         const data = await whois(baseDomain);
-        let ip;
+        let ipv4 = null;
+        let ipv6 = null;
         try {
             const addresses = await dns.lookup(baseDomain, { all: true });
-            ip = addresses[0]?.address;
+            for (const addr of addresses) {
+                if (addr.family === 4 && !ipv4) ipv4 = addr.address;
+                if (addr.family === 6 && !ipv6) ipv6 = addr.address;
+            }
         } catch (e) {
-            ip = null;
+            // ignore
         }
         let isCloudflare = false;
-        if (ip) {
-            isCloudflare = isIPInCloudflare(ip);
-        }
+        if (ipv4 && isIPInCloudflare(ipv4)) isCloudflare = true;
+        if (ipv6 && isIPInCloudflare(ipv6)) isCloudflare = true;
         const cmsData = await detectCMS(url);
         // dino
         let isOldAsRocks = false;
@@ -94,11 +97,10 @@ app.post('/api/check', async (req, res) => {
                 }
             }
         }
-        if (isCloudflare) {
-            res.json({ success: true, data, isCloudflare, cmsData, isOldAsRocks });
-        } else {
-            res.json({ success: true, data, isCloudflare, ip, cmsData, isOldAsRocks });
-        }
+        const ipResult = {};
+        if (ipv4) ipResult.ipv4 = ipv4;
+        if (ipv6) ipResult.ipv6 = ipv6;
+        res.json({ success: true, data, isCloudflare, ip: ipResult, cmsData, isOldAsRocks });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
