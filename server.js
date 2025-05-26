@@ -110,7 +110,10 @@ async function detectCMS(url) {
             html.includes('<span class="item">Powered By <a href="https://namelessmc.com">NamelessMC</a></span>'),
             html.includes('<a class="ui small default button"'),
             html.includes("console.warn('Failed to initialise cookie consent, it may be blocked by your browser or a browser extension');") ||
-            html.includes('window.cookieconsent.initialise({')
+            html.includes('window.cookieconsent.initialise({'),
+            html.includes('Coldfire'),
+            html.includes('coldfire'),
+            html.includes('<a class="silkyItem"')
         ];
         const namelessCount = namelessChecks.filter(Boolean).length;
         if (namelessCount >= 2) { // only is included bc nameless has weird html and only 1 is unique enough
@@ -151,6 +154,13 @@ async function detectCMS(url) {
         // Carrd
         if (html.includes('window.CARRD_DISABLE_ANIMATION')) { // Carrd check is not great as they make their code impossible to read and find unique identifiers
             return { cms: { name: 'Carrd', url: 'https://carrd.co' } };
+        }
+        // Plex Store
+        if (
+            html.includes('Plex Store is made by Plex Development.'),
+            html.includes('PlexStore'),
+            html.includes('Plex Store')) {
+            return { cms: { name: 'Plex Store', url: 'https://plexdevelopment.net' } };
         }
         // more
         
