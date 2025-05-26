@@ -100,7 +100,64 @@ app.post('/api/check', async (req, res) => {
         const ipResult = {};
         if (ipv4) ipResult.ipv4 = ipv4;
         if (ipv6) ipResult.ipv6 = ipv6;
-        res.json({ success: true, data, isCloudflare, ip: ipResult, cmsData, isOldAsRocks });
+
+        // ssl
+        let sslInfo = null;
+        try {
+            const urlObj = new URL(url.startsWith('http') ? url : 'https://' + url);
+            if (urlObj.protocol === 'https:') {
+                const tls = require('tls');
+                const net = require('net');
+                sslInfo = await new Promise((resolve, reject) => {
+                    const socket = tls.connect({
+                        host: urlObj.hostname,
+                        port: 443,
+                        servername: urlObj.hostname,
+                        rejectUnauthorized: false,
+                        timeout: 5000
+                    }, () => {
+                        const cert = socket.getPeerCertificate();
+                        if (cert && cert.issuer) {
+                            resolve({
+                                issuer: cert.issuer.O || cert.issuer.CN || cert.issuerName,
+                                valid_from: cert.valid_from,
+                                valid_to: cert.valid_to
+                            });
+                        } else {
+                            resolve(null);
+                        }
+                        socket.end();
+                    });
+                    socket.on('error', () => resolve(null));
+                    socket.on('timeout', () => {
+                        socket.destroy();
+                        resolve(null);
+                    });
+                });
+            }
+        } catch (e) {
+            sslInfo = null;
+        }
+
+        // page
+        let pageLoadTime = null;
+        try {
+            const start = Date.now();
+            const pageUrl = url.startsWith('http') ? url : 'https://' + url;
+            await axios.get(pageUrl, {
+                timeout: 10000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36' // generic ua to avoid blocking
+                },
+                maxRedirects: 5,
+                validateStatus: null
+            });
+            pageLoadTime = Date.now() - start;
+        } catch (e) {
+            pageLoadTime = null;
+        }
+
+        res.json({ success: true, data, isCloudflare, ip: ipResult, cmsData, isOldAsRocks, sslInfo, pageLoadTime });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

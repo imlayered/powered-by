@@ -140,6 +140,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     cmsSection = `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Software</strong><br><strong>CMS:</strong> ${cmsDisplay}</div>`;
                 }
                 results.innerHTML = warning + domainSection + cmsSection + cfSection + ipSection;
+                // ssl
+                if (data.sslInfo) {
+                    results.innerHTML += `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>SSL Certificate</strong><br>
+                        <strong>Issuer:</strong> ${data.sslInfo.issuer || 'Unknown'}<br>
+                        <strong>Valid From:</strong> ${data.sslInfo.valid_from || 'Unknown'}<br>
+                        <strong>Valid To:</strong> ${data.sslInfo.valid_to || 'Unknown'}
+                    </div>`;
+                }
+                // speeeeeed
+                if (typeof data.pageLoadTime === 'number') {
+                    results.innerHTML += `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Page Load Time</strong><br>
+                        <strong>Time:</strong> ${data.pageLoadTime} ms
+                    </div>`;
+                }
                 const dinoImgId = 'dino-img-footer';
                 let dino = document.getElementById(dinoImgId);
                 if (dino) dino.remove();
