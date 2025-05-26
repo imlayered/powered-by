@@ -110,7 +110,10 @@ async function detectCMS(url) {
             html.includes('<span class="item">Powered By <a href="https://namelessmc.com">NamelessMC</a></span>'),
             html.includes('<a class="ui small default button"'),
             html.includes("console.warn('Failed to initialise cookie consent, it may be blocked by your browser or a browser extension');") ||
-            html.includes('window.cookieconsent.initialise({')
+            html.includes('window.cookieconsent.initialise({'),
+            html.includes('Coldfire'),
+            html.includes('coldfire'),
+            html.includes('<a class="silkyItem"')
         ];
         const namelessCount = namelessChecks.filter(Boolean).length;
         if (namelessCount >= 2) { // only is included bc nameless has weird html and only 1 is unique enough
@@ -151,6 +154,119 @@ async function detectCMS(url) {
         // Carrd
         if (html.includes('window.CARRD_DISABLE_ANIMATION')) { // Carrd check is not great as they make their code impossible to read and find unique identifiers
             return { cms: { name: 'Carrd', url: 'https://carrd.co' } };
+        }
+        // Plex Store
+        if (
+            html.includes('Plex Store is made by Plex Development.'),
+            html.includes('PlexStore'),
+            html.includes('Plex Store'),
+            html.includes('<!-- Site Visits This Month -->') ||
+            html.includes('textContent = new Date().getFullYear();') ||
+            html.includes('    const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('),
+            html.includes('(%%__NONCE__%%) ') ||
+            html.includes('console.groupEnd();')) {
+            return { cms: { name: 'Plex Store', url: 'https://plexdevelopment.net/' } };
+        }
+        // Tebex
+        if (
+            html.includes('Removal of the Tebex footer violates our Terms & Conditions.'),
+            html.includes('<script type="text/javascript" src="https://nsure.tebex.io/sdk.js">'),
+            html.includes('<script defer src="https://js.tebex.io/v/1.js"></script>')) {
+            return { cms: { name: 'Tebex', url: 'https://tebex.io/' } };
+        }
+        // CraftingStore
+        if (
+            html.includes('<script src="https://cdn.craftingstore.net/assets/shops/js/jquery.min.js" data-no-instant></script>'),
+            html.includes('<script src="https://cdn.craftingstore.net/assets/shops/js/bootstrap.min.js" data-no-instant></script>'),
+            html.includes('<script src="https://cdn.craftingstore.net/assets/shops/js/store.js" data-no-instant></script>')) {
+            return { cms: { name: 'CraftingStore', url: 'https://craftingstore.net/' } };
+        }
+        // Weebly
+        if (
+            html.includes('<script type="text/javascript">_W.configDomain = "www.weebly.com";</script><script>_W.relinquish && _W.relinquish()</script>'),
+            html.includes('<div class="weebly-footer"'),
+            html.includes('Powered by <span class="link weebly-icon"></span>'),
+            html.includes('Proudly powered by <a href="https://www.weebly.com/?utm_source=internal&utm_medium=footer&utm_campaign=2" href="_blank">Weebly</a>')) {
+            return { cms: { name: 'Weebly', url: 'https://www.weebly.com/' } };
+        }
+        // Discourse
+        if (
+            html.includes('<link href="/stylesheets/discourse-details'),
+            html.includes('<script defer src="/assets/plugins/discourse-local-dates'),
+            html.includes('<link rel="preload" href="/assets/discourse'),
+            html.includes('<link rel="preload" href="/assets/start-discourse'),
+            html.includes('discourse-cdn.com')) {
+            return { cms: { name: 'Discourse', url: 'https://www.discourse.org/' } };
+        }
+        // Flarum
+        if (
+            html.includes('<script id="flarum-json-payload'),
+            html.includes('flarum.core.app.load(data);'),
+            html.includes('var flarum')) {
+            return { cms: { name: 'Flarum', url: 'https://flarum.org/' } };
+        }
+        // Vanilla
+        if (
+            html.includes('<title>Powered By Vanilla</title>'),
+            html.includes('<script src="/applications/vanilla/js/'),
+            html.includes('<script>window.__VANILLA_BUILD_SECTION__=')) {
+            return { cms: { name: 'Vanilla-OSS', url: 'https://vanilla.higherlogic.com/' } };
+        }
+        // Squarespace
+        if (
+            html.includes('<!-- This is Squarespace. -->'),
+            html.includes('squarespace-cdn.com'),
+            html.includes('<script defer="true" src="https://static1.squarespace.com')) {
+            return { cms: { name: 'Squarespace', url: 'https://www.squarespace.com/' } };
+        }
+        // Webflow
+        if (
+            html.includes('var Webflow = Webflow'),
+            html.includes('Webflow.push(() => {'),
+            html.includes('<!-- This site was built in Webflow.'),
+            html.includes('<title>Made in Webflow</title>')) {
+            return { cms: { name: 'Webflow', url: 'https://webflow.com/' } };
+        }
+        // Zyro
+        if (
+            html.includes('https://zyroassets'),
+            html.includes('https://cdn.zyrosite.com')) {
+            return { cms: { name: 'Zyro', url: 'https://easywithai.com/tools/zyro' } };
+        }
+        // Shopify
+        if (
+            html.includes('<link rel="dns-prefetch" href="//cdn.shopify.com"/>'),
+            html.includes('<script data-source-attribution="shopify.dynamic_checkout.dynamic.init">'),
+            html.includes('window.ShopifyAnalytics = window.ShopifyAnalytics')) {
+            return { cms: { name: 'Shopify', url: 'https://www.shopify.com/' } };
+        }
+        // Odoo
+        if (
+            html.includes('<script id="web.layout.odooscript" type="text/javascript">'),
+            html.includes('odoo.__session_info__ ='),
+            html.includes('<meta name="generator" content="Odoo"/>')) {
+            return { cms: { name: 'Odoo', url: 'https://www.odoo.com/' } };
+        }
+        // Drupal
+        if (
+            html.includes('<meta name="Generator" content="Drupal'),
+            html.includes('<div data-drupal-messages-fallback class="hidden"></div>'),
+            html.includes('data-drupal-selector="drupal-settings-json">')) {
+            return { cms: { name: 'Drupal', url: 'https://new.drupal.org/home' } };
+        }
+        // Clientexec
+        if (
+            html.includes('var clientexec = {};'),
+            html.includes('clientexec.sessionHash = '),
+            html.includes('clientexec.dateFormat =')) {
+            return { cms: { name: 'Clientexec', url: 'https://www.clientexec.com/' } };
+        }
+        // Notion
+        if (
+            html.includes('https://usenotioncms.com/proxy') ||
+            html.includes('.notion-collection-page-properties {'),
+            html.includes(',{"notion_data":{')) {
+            return { cms: { name: 'Notion', url: 'https://www.notion.com/' } };
         }
         // more
         
