@@ -174,6 +174,9 @@ app.post('/api/check', async (req, res) => {
                 if (/facebook\.net\/en_US\/fbevents\.js|connect\.facebook\.net\/en_US\/fbds\.js/i.test(html)) {
                     trackingSoftware.push('Facebook Pixel');
                 }
+                if (/announce\.layeredy\.com/i.test(html)) {
+                    trackingSoftware.push('Layeredy Announce Analytics');
+                }
             }
         } catch (e) {
             pageLoadTime = null;
