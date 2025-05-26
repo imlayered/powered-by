@@ -26,7 +26,7 @@
 | [Vanilla-OSS](https://open.vanillaforums.com/) | Done 🟢 | Software/Forum |
 | [Webflow](https://webflow.com/) | Done 🟢 | Builder/CMS |
 | [Zyro](https://easywithai.com/tools/zyro) | Done 🟢 | Builder/CMS |
-| [Shopify](https://shopify.com) | Planned 🟢 | Builder/Billing |
+| [Shopify](https://shopify.com) | Done 🟢 | Builder/Billing |
 | [Squarespace](https://squarespace.com) | Done 🟢 | Builder/CMS |
 | [Odoo](https://www.odoo.com) | Done 🟢 | Builder/CMS |
 | [Drupal](https://new.drupal.org/home) | Done 🟢 | Builder/CMS |
