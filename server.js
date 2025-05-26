@@ -141,10 +141,11 @@ app.post('/api/check', async (req, res) => {
 
         // page
         let pageLoadTime = null;
+        let trackingSoftware = [];
         try {
             const start = Date.now();
             const pageUrl = url.startsWith('http') ? url : 'https://' + url;
-            await axios.get(pageUrl, {
+            const pageResp = await axios.get(pageUrl, {
                 timeout: 10000,
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36' // generic ua to avoid blocking
@@ -153,11 +154,32 @@ app.post('/api/check', async (req, res) => {
                 validateStatus: null
             });
             pageLoadTime = Date.now() - start;
+            if (pageResp && pageResp.data) {
+                const html = pageResp.data;
+                if (/www\.googletagmanager\.com\/gtag\/js|google-analytics\.com\/analytics\.js|ga\('create'|gtag\(/i.test(html)) {
+                    trackingSoftware.push('Google Analytics');
+                }
+                if (/plausible\.io\/js\/plausible\.js/i.test(html)) {
+                    trackingSoftware.push('Plausible');
+                }
+                if (/cdn\.segment\.com\/analytics\.js/i.test(html)) {
+                    trackingSoftware.push('Segment');
+                }
+                if (/hotjar\.com\/c\/hotjar-/i.test(html)) {
+                    trackingSoftware.push('Hotjar');
+                }
+                if (/clarity\.ms\/tag/i.test(html)) {
+                    trackingSoftware.push('Microsoft Clarity');
+                }
+                if (/facebook\.net\/en_US\/fbevents\.js|connect\.facebook\.net\/en_US\/fbds\.js/i.test(html)) {
+                    trackingSoftware.push('Facebook Pixel');
+                }
+            }
         } catch (e) {
             pageLoadTime = null;
         }
 
-        res.json({ success: true, data, isCloudflare, ip: ipResult, cmsData, isOldAsRocks, sslInfo, pageLoadTime });
+        res.json({ success: true, data, isCloudflare, ip: ipResult, cmsData, isOldAsRocks, sslInfo, pageLoadTime, trackingSoftware });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

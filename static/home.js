@@ -148,6 +148,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <strong>Valid To:</strong> ${data.sslInfo.valid_to || 'Unknown'}
                     </div>`;
                 }
+                // tracking/analytics
+                if (Array.isArray(data.trackingSoftware) && data.trackingSoftware.length > 0) {
+                    results.innerHTML += `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Tracking/Analytics</strong><br>
+                        <strong>Detected:</strong> ${data.trackingSoftware.map(s => `<span style='border-radius:4px;padding:2px 7px;margin-right:4px;'>${s}</span>`).join(' ')}
+                    </div>`;
+                }
                 // speeeeeed
                 if (typeof data.pageLoadTime === 'number') {
                     results.innerHTML += `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Page Load Time</strong><br>
