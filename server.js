@@ -148,6 +148,10 @@ async function detectCMS(url) {
         ) {
             return { cms: { name: 'Wix', url: 'https://wix.com' } };
         }
+        // Carrd
+        if (html.includes('window.CARRD_DISABLE_ANIMATION')) { // Carrd check is not great as they make their code impossible to read and find unique identifiers
+            return { cms: { name: 'Carrd', url: 'https://carrd.co' } };
+        }
         // more
         
         return { cms: null };

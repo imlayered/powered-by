@@ -15,7 +15,9 @@
 | [Pterodactyl](https://pterodactyl.io/) | Done 🟢 | Software |
 | [Substack](https://substack.com) | Done 🟢 | Builder/CMS |
 | [Google Sites](https://sites.google.com) | Done 🟢 | Builder |
-| [Wix](https://wix.com) | Planned 🟡 | Builder/CMS |
-| [Shopify](https://shopify.com) | Planned 🟡 | Builder/CMS |
+| [Wix](https://wix.com) | Done 🟢 | Builder/CMS |
+| [Wix](https://wix.com) | Done 🟢 | Builder/CMS |
+| [Carrd](https://carrd.co) | Done 🟢 | Builder/CMS |
+| [Shopify](https://shopify.com) | Planned 🟡 | Builder |
 | [Squarespace](https://squarespace.com) | Planned 🟡 | Builder/CMS |
 | [Odoo](https://www.odoo.com) | Planned 🟡 | Builder/CMS |
