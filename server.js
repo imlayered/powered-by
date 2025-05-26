@@ -160,7 +160,21 @@ async function detectCMS(url) {
             html.includes('Plex Store is made by Plex Development.'),
             html.includes('PlexStore'),
             html.includes('Plex Store')) {
-            return { cms: { name: 'Plex Store', url: 'https://plexdevelopment.net' } };
+            return { cms: { name: 'Plex Store', url: 'https://plexdevelopment.net/' } };
+        }
+        // Tebex
+        if (
+            html.includes('Removal of the Tebex footer violates our Terms & Conditions.'),
+            html.includes('<script type="text/javascript" src="https://nsure.tebex.io/sdk.js">'),
+            html.includes('<script defer src="https://js.tebex.io/v/1.js"></script>')) {
+            return { cms: { name: 'Tebex', url: 'https://tebex.io/' } };
+        }
+        // CraftingStore
+        if (
+            html.includes('<script src="https://cdn.craftingstore.net/assets/shops/js/jquery.min.js" data-no-instant></script>'),
+            html.includes('<script src="https://cdn.craftingstore.net/assets/shops/js/bootstrap.min.js" data-no-instant></script>'),
+            html.includes('<script src="https://cdn.craftingstore.net/assets/shops/js/store.js" data-no-instant></script>')) {
+            return { cms: { name: 'CraftingStore', url: 'https://craftingstore.net/' } };
         }
         // more
         
