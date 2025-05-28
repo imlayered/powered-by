@@ -11,7 +11,6 @@ Easily and quickly check what a website is using
 - Check if a website is using Cloudflare
 - Check a website's age
 - Check a website's IP address
-### Soon to be features:
 - Check a website's SEO  
 - Check a website's SSL
 
