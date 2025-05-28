@@ -57,132 +57,146 @@ function getBaseDomain(url) {
 
 // api
 app.post('/api/check', async (req, res) => {
-    const { url } = req.body;
+    const { url, fields } = req.body;
     if (!url) {
         return res.status(400).json({ error: 'Missing url' });
     }
+    const want = (Array.isArray(fields) && fields.length > 0)
+        ? new Set(fields.map(f => String(f)))
+        : null;
     try {
         const baseDomain = getBaseDomain(url);
-        const data = await whois(baseDomain);
-        let ipv4 = null;
-        let ipv6 = null;
-        try {
-            const addresses = await dns.lookup(baseDomain, { all: true });
-            for (const addr of addresses) {
-                if (addr.family === 4 && !ipv4) ipv4 = addr.address;
-                if (addr.family === 6 && !ipv6) ipv6 = addr.address;
-            }
-        } catch (e) {
-            // ignore
+        let data, ipv4, ipv6, isCloudflare, cmsData, isOldAsRocks, sslInfo, pageLoadTime, trackingSoftware;
+        if (!want || want.has('data')) {
+            data = await whois(baseDomain);
         }
-        let isCloudflare = false;
-        if (ipv4 && isIPInCloudflare(ipv4)) isCloudflare = true;
-        if (ipv6 && isIPInCloudflare(ipv6)) isCloudflare = true;
-        const cmsData = await detectCMS(url);
-        // dino
-        let isOldAsRocks = false;
-        let createdDate = data.creationDate || data['Creation Date'] || data['createdDate'] || data['created'] || null;
-        if (createdDate) {
-            let created = new Date(createdDate);
-            if (!isNaN(created)) {
-                let now = new Date();
-                let years = now.getFullYear() - created.getFullYear();
-                let months = now.getMonth() - created.getMonth();
-                if (months < 0) {
-                    years--;
-                    months += 12;
+        if (!want || want.has('ip') || want.has('isCloudflare')) {
+            try {
+                const addresses = await dns.lookup(baseDomain, { all: true });
+                for (const addr of addresses) {
+                    if (addr.family === 4 && !ipv4) ipv4 = addr.address;
+                    if (addr.family === 6 && !ipv6) ipv6 = addr.address;
                 }
-                if (years >= 20) {
-                    isOldAsRocks = true;
+            } catch (e) {}
+        }
+        if (!want || want.has('isCloudflare')) {
+            isCloudflare = false;
+            if (ipv4 && isIPInCloudflare(ipv4)) isCloudflare = true;
+            if (ipv6 && isIPInCloudflare(ipv6)) isCloudflare = true;
+        }
+        if (!want || want.has('cmsData')) {
+            cmsData = await detectCMS(url);
+        }
+        if (!want || want.has('isOldAsRocks')) {
+            isOldAsRocks = false;
+            let createdDate = (data && (data.creationDate || data['Creation Date'] || data['createdDate'] || data['created'])) || null;
+            if (createdDate) {
+                let created = new Date(createdDate);
+                if (!isNaN(created)) {
+                    let now = new Date();
+                    let years = now.getFullYear() - created.getFullYear();
+                    let months = now.getMonth() - created.getMonth();
+                    if (months < 0) {
+                        years--;
+                        months += 12;
+                    }
+                    if (years >= 20) {
+                        isOldAsRocks = true;
+                    }
                 }
             }
         }
-        const ipResult = {};
-        if (ipv4) ipResult.ipv4 = ipv4;
-        if (ipv6) ipResult.ipv6 = ipv6;
-
-        // ssl
-        let sslInfo = null;
-        try {
-            const urlObj = new URL(url.startsWith('http') ? url : 'https://' + url);
-            if (urlObj.protocol === 'https:') {
-                const tls = require('tls');
-                const net = require('net');
-                sslInfo = await new Promise((resolve, reject) => {
-                    const socket = tls.connect({
-                        host: urlObj.hostname,
-                        port: 443,
-                        servername: urlObj.hostname,
-                        rejectUnauthorized: false,
-                        timeout: 5000
-                    }, () => {
-                        const cert = socket.getPeerCertificate();
-                        if (cert && cert.issuer) {
-                            resolve({
-                                issuer: cert.issuer.O || cert.issuer.CN || cert.issuerName,
-                                valid_from: cert.valid_from,
-                                valid_to: cert.valid_to
-                            });
-                        } else {
-                            resolve(null);
-                        }
-                        socket.end();
-                    });
-                    socket.on('error', () => resolve(null));
-                    socket.on('timeout', () => {
-                        socket.destroy();
-                        resolve(null);
-                    });
-                });
-            }
-        } catch (e) {
+        if (!want || want.has('sslInfo')) {
             sslInfo = null;
-        }
-
-        // page
-        let pageLoadTime = null;
-        let trackingSoftware = [];
-        try {
-            const start = Date.now();
-            const pageUrl = url.startsWith('http') ? url : 'https://' + url;
-            const pageResp = await axios.get(pageUrl, {
-                timeout: 10000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36' // generic ua to avoid blocking
-                },
-                maxRedirects: 5,
-                validateStatus: null
-            });
-            pageLoadTime = Date.now() - start;
-            if (pageResp && pageResp.data) {
-                const html = pageResp.data;
-                if (/www\.googletagmanager\.com\/gtag\/js|google-analytics\.com\/analytics\.js|ga\('create'|gtag\(/i.test(html)) {
-                    trackingSoftware.push('Google Analytics');
+            try {
+                const urlObj = new URL(url.startsWith('http') ? url : 'https://' + url);
+                if (urlObj.protocol === 'https:') {
+                    const tls = require('tls');
+                    const net = require('net');
+                    sslInfo = await new Promise((resolve, reject) => {
+                        const socket = tls.connect({
+                            host: urlObj.hostname,
+                            port: 443,
+                            servername: urlObj.hostname,
+                            rejectUnauthorized: false,
+                            timeout: 5000
+                        }, () => {
+                            const cert = socket.getPeerCertificate();
+                            if (cert && cert.issuer) {
+                                resolve({
+                                    issuer: cert.issuer.O || cert.issuer.CN || cert.issuerName,
+                                    valid_from: cert.valid_from,
+                                    valid_to: cert.valid_to
+                                });
+                            } else {
+                                resolve(null);
+                            }
+                            socket.end();
+                        });
+                        socket.on('error', () => resolve(null));
+                        socket.on('timeout', () => {
+                            socket.destroy();
+                            resolve(null);
+                        });
+                    });
                 }
-                if (/plausible\.io\/js\/plausible\.js/i.test(html)) {
-                    trackingSoftware.push('Plausible');
-                }
-                if (/cdn\.segment\.com\/analytics\.js/i.test(html)) {
-                    trackingSoftware.push('Segment');
-                }
-                if (/hotjar\.com\/c\/hotjar-/i.test(html)) {
-                    trackingSoftware.push('Hotjar');
-                }
-                if (/clarity\.ms\/tag/i.test(html)) {
-                    trackingSoftware.push('Microsoft Clarity');
-                }
-                if (/facebook\.net\/en_US\/fbevents\.js|connect\.facebook\.net\/en_US\/fbds\.js/i.test(html)) {
-                    trackingSoftware.push('Facebook Pixel');
-                }
-                if (/announce\.layeredy\.com/i.test(html)) {
-                    trackingSoftware.push('Layeredy Announce Analytics');
-                }
+            } catch (e) {
+                sslInfo = null;
             }
-        } catch (e) {
-            pageLoadTime = null;
         }
-
-        res.json({ success: true, data, isCloudflare, ip: ipResult, cmsData, isOldAsRocks, sslInfo, pageLoadTime, trackingSoftware });
+        if (!want || want.has('pageLoadTime') || want.has('trackingSoftware')) {
+            pageLoadTime = null;
+            trackingSoftware = [];
+            try {
+                const start = Date.now();
+                const pageUrl = url.startsWith('http') ? url : 'https://' + url;
+                const pageResp = await axios.get(pageUrl, {
+                    timeout: 10000,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
+                    },
+                    maxRedirects: 5,
+                    validateStatus: null
+                });
+                pageLoadTime = Date.now() - start;
+                if (pageResp && pageResp.data) {
+                    const html = pageResp.data;
+                    if (/www\.googletagmanager\.com\/gtag\/js|google-analytics\.com\/analytics\.js|ga\('create'|gtag\(/i.test(html)) {
+                        trackingSoftware.push('Google Analytics');
+                    }
+                    if (/plausible\.io\/js\/plausible\.js/i.test(html)) {
+                        trackingSoftware.push('Plausible');
+                    }
+                    if (/cdn\.segment\.com\/analytics\.js/i.test(html)) {
+                        trackingSoftware.push('Segment');
+                    }
+                    if (/hotjar\.com\/c\/hotjar-/i.test(html)) {
+                        trackingSoftware.push('Hotjar');
+                    }
+                    if (/clarity\.ms\/tag/i.test(html)) {
+                        trackingSoftware.push('Microsoft Clarity');
+                    }
+                    if (/facebook\.net\/en_US\/fbevents\.js|connect\.facebook\.net\/en_US\/fbds\.js/i.test(html)) {
+                        trackingSoftware.push('Facebook Pixel');
+                    }
+                    if (/announce\.layeredy\.com/i.test(html)) {
+                        trackingSoftware.push('Layeredy Announce Analytics');
+                    }
+                }
+            } catch (e) {
+                pageLoadTime = null;
+            }
+        }
+        const resp = { success: true };
+        if (!want || want.has('data')) resp.data = data;
+        if (!want || want.has('isCloudflare')) resp.isCloudflare = isCloudflare;
+        if (!want || want.has('ip')) resp.ip = { ...(ipv4 && { ipv4 }), ...(ipv6 && { ipv6 }) };
+        if (!want || want.has('cmsData')) resp.cmsData = cmsData;
+        if (!want || want.has('isOldAsRocks')) resp.isOldAsRocks = isOldAsRocks;
+        if (!want || want.has('sslInfo')) resp.sslInfo = sslInfo;
+        if (!want || want.has('pageLoadTime')) resp.pageLoadTime = pageLoadTime;
+        if (!want || want.has('trackingSoftware')) resp.trackingSoftware = trackingSoftware;
+        res.json(resp);
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
