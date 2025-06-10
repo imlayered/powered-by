@@ -1,0 +1,22 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0A0A0A; 
+    color: #E5E7EB; 
+    }
+    .feature-card {
+    border: 1px solid #374151; 
+    transition: border-color 0.2s ease-in-out;
+    }
+    .feature-card:hover {
+        border-color: #6B7280; 
+    }
+    .btn-ghost {
+        background-color: transparent;
+        border: 1px solid #E5E7EB;
+        color: #E5E7EB;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .btn-ghost:hover {
+        background-color: #E5E7EB;
+        color: #0A0A0A;
+    }
