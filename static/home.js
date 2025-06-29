@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const results = document.getElementById('results');
     const titleElement = document.querySelector('.title');
     const typewriterElem = document.getElementById('typewriter');
+    const turnstileContainer = document.getElementById('turnstile-container');
+    let turnstileWidgetId = null;
+    let turnstileSitekey = null;
+    let turnstileToken = null;
     
     // i removd the typewriter effect it bad
     titleElement.innerHTML = '<strong>Powered by</strong>';
@@ -42,9 +46,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    fetch('/api/turnstile-sitekey')
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+            if (data.sitekey && window.turnstile) {
+                turnstileSitekey = data.sitekey;
+                turnstileWidgetId = window.turnstile.render(turnstileContainer, {
+                    sitekey: turnstileSitekey,
+                    callback: token => { turnstileToken = token; },
+                    'error-callback': () => { turnstileToken = null; },
+                    theme: 'auto',
+                });
+            } else if (data.sitekey) {
+                window.addEventListener('turnstile-loaded', () => {
+                    turnstileSitekey = data.sitekey;
+                    turnstileWidgetId = window.turnstile.render(turnstileContainer, {
+                        sitekey: turnstileSitekey,
+                        callback: token => { turnstileToken = token; },
+                        'error-callback': () => { turnstileToken = null; },
+                        theme: 'auto',
+                    });
+                }, { once: true });
+            }
+        })
+        .catch(() => {});
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        results.textContent = 'Checking...';
+        results.textContent = 'Checking... (This should only tke a few seconds)';
         titleElement.innerHTML = originalTitle;
         
         let url = input.value.trim();
@@ -67,15 +96,29 @@ document.addEventListener('DOMContentLoaded', () => {
             ]);
         };
         
+        const body = { url };
+        if (turnstileSitekey && turnstileToken) {
+            body['cf-turnstile-response'] = turnstileToken;
+        }
         try {
             const response = await fetchWithTimeout('/api/check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url }),
+                body: JSON.stringify(body),
                 timeout: 10000
             });
-            
             const data = await response.json();
+            if (turnstileSitekey && !data.success && data.error && (
+                data.error.toLowerCase().includes('turnstile') ||
+                data.error.toLowerCase().includes('captcha')
+            )) {
+                results.innerHTML = `<div style='background:#ffefc0;color:#a67c00;padding:0.7em 1em;margin-bottom:1em;border-radius:6px;font-size:1.02em;font-weight:500;'>${data.error}</div>`;
+                if (turnstileWidgetId && window.turnstile) {
+                    window.turnstile.reset(turnstileWidgetId);
+                    turnstileToken = null;
+                }
+                return;
+            }
             
             let warning = '';
             if (data.cmsData && data.cmsData.error) {
@@ -179,10 +222,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 results.textContent = 'Error: ' + (data.error || 'Unknown error');
             }
         } catch (err) {
+            if (turnstileSitekey && (err.message.toLowerCase().includes('turnstile') || err.message.toLowerCase().includes('captcha'))) {
+                results.innerHTML = `<div style='background:#ffefc0;color:#a67c00;padding:0.7em 1em;margin-bottom:1em;border-radius:6px;font-size:1.02em;font-weight:500;'>${err.message}</</div>`;
+                if (turnstileWidgetId && window.turnstile) {
+                    window.turnstile.reset(turnstileWidgetId);
+                    turnstileToken = null;
+                }
+                return;
+            }
             if (err.message === 'timeout') {
                 results.textContent = 'No response';
             } else {
                 results.textContent = 'Request failed: ' + err.message;
+            }
+        } finally {
+            if (turnstileWidgetId && window.turnstile) {
+                window.turnstile.reset(turnstileWidgetId);
+                turnstileToken = null;
             }
         }
     });

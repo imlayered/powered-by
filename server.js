@@ -6,6 +6,9 @@ const axios = require('axios');
 const IPCIDR = require('ip-cidr').default;
 const dns = require('dns').promises;
 const { detectCMS } = require('./checks.js');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -55,8 +58,43 @@ function getBaseDomain(url) {
     }
 }
 
+// captcha/turnstile
+const TURNSTILE_ENABLED = process.env.TURNSTILE_ENABLED === 'true';
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET;
+const TURNSTILE_SITEKEY = process.env.TURNSTILE_SITEKEY;
+
+async function verifyTurnstile(req, res, next) {
+    if (!TURNSTILE_ENABLED) return next();
+    const token = req.body['cf-turnstile-response'] || req.headers['cf-turnstile-response'];
+    if (!token) {
+        return res.status(403).json({ success: false, error: 'Please complete the CAPTCHA' });
+    }
+    try {
+        const form = new URLSearchParams();
+        form.append('secret', TURNSTILE_SECRET);
+        form.append('response', token);
+        form.append('remoteip', req.ip);
+        const result = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', form, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        if (result.data && result.data.success) {
+            return next();
+        } else {
+            console.warn('Turnstile verification failed:', result.data);
+            let errorMsg = 'Invalid Turnstile token';
+            if (result.data && result.data['error-codes'] && Array.isArray(result.data['error-codes'])) {
+                errorMsg += ': ' + result.data['error-codes'].join(', ');
+            }
+            return res.status(403).json({ success: false, error: errorMsg });
+        }
+    } catch (e) {
+        console.error('Turnstile verification error:', e && e.response ? e.response.data : e);
+        return res.status(502).json({ success: false, error: 'Could not reach Turnstile verification server. Please try again later.' });
+    }
+}
+
 // api
-app.post('/api/check', async (req, res) => {
+app.post('/api/check', verifyTurnstile, async (req, res) => {
     const { url, fields } = req.body;
     if (!url) {
         return res.status(400).json({ error: 'Missing url' });
@@ -202,8 +240,17 @@ app.post('/api/check', async (req, res) => {
     }
 });
 
+app.get('/api/turnstile-sitekey', (req, res) => {
+    if (TURNSTILE_ENABLED && TURNSTILE_SITEKEY) {
+        res.json({ sitekey: TURNSTILE_SITEKEY });
+    } else {
+        res.status(404).json({ error: 'Turnstile not enabled' });
+    }
+});
+
 fetchCloudflareRanges().then(() => {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 });
+
