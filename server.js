@@ -60,7 +60,7 @@ function getBaseDomain(url) {
 
 // captcha/turnstile
 const TURNSTILE_ENABLED = process.env.TURNSTILE_ENABLED === 'true';
-const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET;
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET; 
 const TURNSTILE_SITEKEY = process.env.TURNSTILE_SITEKEY;
 
 async function verifyTurnstile(req, res, next) {
@@ -94,6 +94,27 @@ async function verifyTurnstile(req, res, next) {
 }
 
 // api
+const CACHE_ENABLED = process.env.CACHE === 'true';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_MAX_SIZE = 50 * 1024 * 1024; // 50MB
+const siteCache = {};
+let cacheSize = 0;
+const cacheOrder = [];
+
+function getCacheEntrySize(entry) {
+    return Buffer.byteLength(JSON.stringify(entry), 'utf8');
+}
+
+function evictCacheIfNeeded(newEntrySize) {
+    while (cacheSize + newEntrySize > CACHE_MAX_SIZE && cacheOrder.length > 0) {
+        const oldestKey = cacheOrder.shift();
+        if (siteCache[oldestKey]) {
+            cacheSize -= siteCache[oldestKey].__size || getCacheEntrySize(siteCache[oldestKey]);
+            delete siteCache[oldestKey];
+        }
+    }
+}
+
 app.post('/api/check', verifyTurnstile, async (req, res) => {
     const { url, fields } = req.body;
     if (!url) {
@@ -102,6 +123,24 @@ app.post('/api/check', verifyTurnstile, async (req, res) => {
     const want = (Array.isArray(fields) && fields.length > 0)
         ? new Set(fields.map(f => String(f)))
         : null;
+    const cacheKey = url + (want ? ':' + Array.from(want).sort().join(',') : '');
+    if (CACHE_ENABLED && siteCache[cacheKey]) {
+        const { timestamp, data } = siteCache[cacheKey];
+        if (Date.now() - timestamp < CACHE_TTL_MS) {
+            console.log(`[CACHE HIT] ${url}`);
+            return res.json({
+                ...data,
+                cached: true,
+                cacheNote: "We already had this site cached so no request was made. You can self host Powered By (https://lyrdy.co/m1mr) for free to enable the API & bypass the cache"
+            });
+        } else {
+            // expired
+            cacheSize -= siteCache[cacheKey].__size || getCacheEntrySize(siteCache[cacheKey]);
+            const idx = cacheOrder.indexOf(cacheKey);
+            if (idx !== -1) cacheOrder.splice(idx, 1);
+            delete siteCache[cacheKey];
+        }
+    }
     try {
         const baseDomain = getBaseDomain(url);
         let data, ipv4, ipv6, isCloudflare, cmsData, isOldAsRocks, sslInfo, pageLoadTime, trackingSoftware;
@@ -234,6 +273,19 @@ app.post('/api/check', verifyTurnstile, async (req, res) => {
         if (!want || want.has('sslInfo')) resp.sslInfo = sslInfo;
         if (!want || want.has('pageLoadTime')) resp.pageLoadTime = pageLoadTime;
         if (!want || want.has('trackingSoftware')) resp.trackingSoftware = trackingSoftware;
+        if (CACHE_ENABLED) {
+            const now = Date.now();
+            if (resp.data && typeof resp.data === 'object') {
+                resp.data._cachedAt = new Date(now).toISOString();
+            }
+            const entry = { timestamp: now, data: resp };
+            entry.__size = getCacheEntrySize(entry);
+            evictCacheIfNeeded(entry.__size);
+            siteCache[cacheKey] = entry;
+            cacheOrder.push(cacheKey);
+            cacheSize += entry.__size;
+            console.log(`[CACHE MISS] ${url} - caching result (${(entry.__size/1024).toFixed(1)} KB)`);
+        }
         res.json(resp);
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

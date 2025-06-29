@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        results.textContent = 'Checking... (This should only tke a few seconds)';
+        results.textContent = 'Checking... (This should only take a few seconds)';
         titleElement.innerHTML = originalTitle;
         
         let url = input.value.trim();
@@ -202,6 +202,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     results.innerHTML += `<div style='margin-bottom:0.5em;padding:0.5em 0;border-bottom:1px solid #eee;'><strong>Page Load Time</strong><br>
                         <strong>Time:</strong> ${data.pageLoadTime} ms
                     </div>`;
+                }
+                // cache 
+                if (data.cached) {
+                    let cacheMsg = data.cacheNote || '';
+                    let cachedAgo = '';
+                    if (data.data && data.data._cachedAt) {
+                        const cachedAt = new Date(data.data._cachedAt);
+                        const now = new Date();
+                        const diffMs = now - cachedAt;
+                        const diffMins = Math.floor(diffMs / 60000);
+                        const diffHours = Math.floor(diffMins / 60);
+                        if (diffHours > 0) {
+                            cachedAgo = `${diffHours} hour${diffHours !== 1 ? 's' : ''}${diffMins % 60 > 0 ? `, ${diffMins % 60} min${diffMins % 60 !== 1 ? 's' : ''}` : ''}`;
+                        } else {
+                            cachedAgo = `${diffMins} min${diffMins !== 1 ? 's' : ''}`;
+                        }
+                    }
+                    if (!cachedAgo) cachedAgo = 'recently';
+                    const note = document.createElement('div');
+                    note.style.fontSize = '0.98em';
+                    note.style.color = '#888';
+                    note.style.margin = '1.2em 0 0.2em 0';
+                    note.style.textAlign = 'center';
+                    note.style.cursor = 'help';
+                    note.title = cacheMsg;
+                    note.textContent = `Cached (${cachedAgo} ago)`;
+                    results.appendChild(note);
                 }
                 const dinoImgId = 'dino-img-footer';
                 let dino = document.getElementById(dinoImgId);
