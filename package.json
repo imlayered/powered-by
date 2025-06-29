@@ -22,6 +22,7 @@
   "dependencies": {
     "axios": "^1.9.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.0.0",
     "express": "^4.21.2",
     "ip-cidr": "^4.0.2",
     "ip6": "^0.2.11",
